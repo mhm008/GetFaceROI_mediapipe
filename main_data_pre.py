@@ -153,6 +153,29 @@ def  get_ROI(image, x_data_arr, y_data_arr, pos_ind):
                     ymin = y
     ROI = image[ymin:ymax, xmin:xmax]
     return ROI
+def  get_face(image, x_data_arr, y_data_arr):
+    xmax = 0
+    xmin = image.shape[1]
+    ymax = 0
+    ymin = image.shape[0]
+    # print('len(x_data_arr) = ', len(x_data_arr))
+    for k in range(len(x_data_arr)):
+        x = int(x_data_arr[k] * image.shape[1])
+        y = int(y_data_arr[k] * image.shape[0])
+        # for j in range(len(pos_ind)):
+        # if pos_ind[j] ==  k:
+        ## 排除不在图片内的点：x >= 0 and y >= 0
+        if x >= xmax and x >= 0:
+            xmax = x
+        if x <= xmin and x >= 0:
+            xmin = x
+        if y >= ymax and y >= 0:
+            ymax = y
+        if y <= ymin and y >= 0:
+            ymin = y
+    ROI = image[ymin:ymax, xmin:xmax]
+    print('ROI.shape = ', ROI.shape)
+    return ROI
 
 def main():
     path_video = './2021-02-24-视频汇总-anxiety_paper'
@@ -260,6 +283,7 @@ def main():
                         mouth_roi = get_ROI(image, x_data_arr, y_data_arr, mouth)
                         eyeRight_roi = get_ROI(image, x_data_arr, y_data_arr, eyeRight)
                         eyeLeft_roi = get_ROI(image, x_data_arr, y_data_arr, eyeLeft)
+                        face_roi = get_face(image, x_data_arr, y_data_arr)
 
                         # eyebrowRight_roi = get_ROI(image, x_data_arr, y_data_arr, eyebrowRight)
                         # eyebrowLeft_roi = get_ROI(image, x_data_arr, y_data_arr, eyebrowLeft)
@@ -270,6 +294,7 @@ def main():
                         save_img(file[:-4], mouth_roi, 'mouth', count)
                         save_img(file[:-4], eyeRight_roi, 'eyeRight', count)
                         save_img(file[:-4], eyeLeft_roi, 'eyeLeft', count)
+                        save_img(file[:-4], face_roi, 'face', count)
                         # save_img(eyebrowRight_roi, 'eyebrowRight', count)
                         # save_img(eyebrowLeft_roi, 'eyebrowLeft', count)
                         # save_img(forehead_roi, 'forehead', count)
