@@ -6,14 +6,7 @@ import numpy as np
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-# #  呼吸率对应的频率:0.15-0.40Hz，https://www.nature.com/articles/s41598-019-53808-9
-RR_Min_HZ = 0.15
-RR_Max_HZ = 0.40
-# RR_Min_HZ = 0.15
-# RR_Max_HZ = 0.70
 
-# 采样频率
-FPS = 25
 
 
 def _x1y1wh_to_xyxy(bbox_x1y1wh):
