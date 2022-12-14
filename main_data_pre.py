@@ -6,7 +6,14 @@ import numpy as np
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
+# #  呼吸率对应的频率:0.15-0.40Hz，https://www.nature.com/articles/s41598-019-53808-9
+RR_Min_HZ = 0.15
+RR_Max_HZ = 0.40
+# RR_Min_HZ = 0.15
+# RR_Max_HZ = 0.70
 
+# 采样频率
+FPS = 25
 
 
 def _x1y1wh_to_xyxy(bbox_x1y1wh):
@@ -34,9 +41,9 @@ def readvideo_infrared(datapath_infrared):
                 videonpy.append(frame)
                 count_imgs_num = count_imgs_num + 1
         c = c + 1
-        cv2.waitKey(1)
-        if c >= img_num:
-            break
+        # cv2.waitKey(1)
+        # if c >= img_num:
+        #     break
     vc.release()
     videonpy = np.array(videonpy)
     return videonpy
@@ -62,7 +69,7 @@ def draw_ROI_line(x_data_arr, y_data_arr, image, index_ROI):
         y1 = int(y_data_arr[index_ROI[kk]] * image.shape[0])
         x2 = int(x_data_arr[index_ROI[kk + 1]] * image.shape[1])
         y2 = int(y_data_arr[index_ROI[kk + 1]] * image.shape[0])
-        # cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 1)  # 连线
+        cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 1)  # 连线
 
         # 求最大最小值
         if x1 >= xmax:
@@ -104,18 +111,24 @@ def get_face_landmarks(face_landmarks):
     return x_data_arr,  y_data_arr, z_data_arr
 
 
-def save_img(save_img_ID, nose_roi, roi_name, count):
-    path_save = './ROIs/' + save_img_ID +'/' 'ROI_'+ roi_name +'/'
-    # 判断路径是否存在
-    if os.path.exists(path_save):
-        pass
-    else:
-        os.makedirs(path_save)
 
-    savepath = path_save + str(count) +'.jpg'
-    print('savepath = ', savepath)
-    # save
-    cv2.imwrite(savepath, nose_roi)
+def save_img(img_roi, roi_name, count, sub_file_path):
+    if img_roi.shape[0]!= 0 and img_roi.shape[1]!= 0 and  img_roi.shape[2]!= 0:
+        path_save = sub_file_path + '/ROIs/' +'/'+'ROI_'+ roi_name +'/'
+        # path_save = './ROIs/' + save_img_ID +'/' +'ROI_'+ 'new_'+roi_name +'/'
+        print(path_save)
+        # 判断路径是否存在
+        if os.path.exists(path_save):
+            pass
+        else:
+            os.makedirs(path_save)
+
+        savepath = path_save + str(count) +'.jpg'
+        print('savepath = ', savepath)
+        # save
+        cv2.imwrite(savepath, img_roi)
+
+
 
 
 def position_ROI(pos_ROI):
@@ -146,6 +159,8 @@ def  get_ROI(image, x_data_arr, y_data_arr, pos_ind):
                     ymin = y
     ROI = image[ymin:ymax, xmin:xmax]
     return ROI
+
+
 def  get_face(image, x_data_arr, y_data_arr):
     xmax = 0
     xmin = image.shape[1]
@@ -197,8 +212,7 @@ def main():
         drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
         #################### mediapipe人脸检测 #####################
 
-        # 目标追踪算法初始化
-        
+       
         # datapath_infrared  = 'AU2.mp4'
         datapath_infrared = file_video
        
@@ -245,6 +259,7 @@ def main():
                               # eyeLeft = [7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246, 33, 7]
                               # eyeRight = [362,398,384,385,386,387,388,466,263,249,390,373,374,380,381,382]
                               # eyeLeft = [7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246, 33]
+
                               eyeRight = [463, 414, 286, 258, 257, 259, 260, 467,359, 255, 339, 254, 253, 252, 256, 341, 463 ]# NEW
                               eyeLeft = [130, 247, 30, 29, 27,28, 56, 190, 243, 112,26, 22, 23, 24, 110, 25, 130] # NEW
                               # 眉毛
@@ -271,7 +286,7 @@ def main():
                         # eyeLeft_roi, pos_eyeLeft_roi = draw_ROI_line(x_data_arr, y_data_arr, image, eyeLeft)
                         # xmin, ymin, xmax, ymax = position_ROI(pos_eyeRight_roi)
                         # cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0,0,255), 2)
-                        # cv2.imshow('nose_roi', nose_roi)
+                        # cv2.imshow('image', image)
                         # cv2.waitKey(0)
 
 
@@ -279,20 +294,16 @@ def main():
                         eyeRight_roi = get_ROI(image, x_data_arr, y_data_arr, eyeRight)
                         eyeLeft_roi = get_ROI(image, x_data_arr, y_data_arr, eyeLeft)
                         face_roi = get_face(image, x_data_arr, y_data_arr)
+                        # cv2.imshow('face_roi', face_roi)
+                        # cv2.waitKey(0)
 
-                        # eyebrowRight_roi = get_ROI(image, x_data_arr, y_data_arr, eyebrowRight)
-                        # eyebrowLeft_roi = get_ROI(image, x_data_arr, y_data_arr, eyebrowLeft)
-
-                        # forehead_roi = get_ROI(image, x_data_arr, y_data_arr, forehead)
 
                         # SAVE IMG
                         save_img(file[:-4], mouth_roi, 'mouth', count)
                         save_img(file[:-4], eyeRight_roi, 'eyeRight', count)
                         save_img(file[:-4], eyeLeft_roi, 'eyeLeft', count)
-                        save_img(file[:-4], face_roi, 'face', count)
-                        # save_img(eyebrowRight_roi, 'eyebrowRight', count)
-                        # save_img(eyebrowLeft_roi, 'eyebrowLeft', count)
-                        # save_img(forehead_roi, 'forehead', count)
+                        # save_img(file[:-4], face_roi, 'face', count)
+
 
                         count = count + 1
                 except:
