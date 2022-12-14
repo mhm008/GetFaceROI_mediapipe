@@ -6,21 +6,7 @@ import numpy as np
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-# #  呼吸率对应的频率:0.15-0.40Hz，https://www.nature.com/articles/s41598-019-53808-9
-RR_Min_HZ = 0.15
-RR_Max_HZ = 0.40
-# RR_Min_HZ = 0.15
-# RR_Max_HZ = 0.70
 
-# 采样频率
-FPS = 25
-
-
-def _x1y1wh_to_xyxy(bbox_x1y1wh):
-    x1, y1, w, h = bbox_x1y1wh
-    x2 = int(x1+w)
-    y2 = int(y1+h)
-    return x1, y1, x2, y2
 
 def readvideo_infrared(datapath_infrared):
     img_num = 1500
@@ -48,12 +34,6 @@ def readvideo_infrared(datapath_infrared):
     videonpy = np.array(videonpy)
     return videonpy
 
-# 计算img_ROI转化成灰度图之后的平均像素值
-def get_avg_gray_pixel(img_ROI):
-    gray_img = cv2.cvtColor(img_ROI, cv2.COLOR_BGR2GRAY)
-    avg_pixel = np.mean(gray_img)
-    # cv2.imshow('gray_img', gray_img)
-    return avg_pixel
 
 
 def draw_ROI_line(x_data_arr, y_data_arr, image, index_ROI):
